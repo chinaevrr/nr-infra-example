@@ -5,7 +5,7 @@ Terraform used the selected providers to generate the following execution plan. 
 - destroy
   -/+ destroy and then create replacement
 
-Terraform will perform the following actions:
+~ Terraform will perform the following actions:
 
 # local_file.add_file will be created
 + resource "local_file" "add_file" {
