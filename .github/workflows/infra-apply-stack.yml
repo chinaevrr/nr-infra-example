@@ -3,7 +3,7 @@ on:
   workflow_dispatch:
     inputs:
       version:
-        type: ref
+        type: branch-selection
 jobs:
   test-job:
     runs-on: ubuntu-latest
