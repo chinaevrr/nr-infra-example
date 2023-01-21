@@ -4,7 +4,6 @@ on:
     inputs:
       tag:
         type: string
-        required: true
 jobs:
   test-job:
     runs-on: ubuntu-latest
