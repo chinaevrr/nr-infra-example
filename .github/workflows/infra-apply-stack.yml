@@ -1,6 +1,9 @@
 name: Infrastructure apply stack
 on:
   workflow_dispatch:
+    inputs:
+      version:
+        type: ref
 jobs:
   test-job:
     runs-on: ubuntu-latest
