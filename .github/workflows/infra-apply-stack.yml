@@ -20,6 +20,7 @@ on:
         options: [ LAB, DEV, QA, PPE, PROD ]
 env:
   ASSET_ID: assetId
+  CICD_AWS_REGION: us-east-1
 jobs:
   plan:
     runs-on: ubuntu-latest
@@ -59,7 +60,7 @@ jobs:
         with:
           aws-access-key-id: ${{ secrets.CICD_AWS_ACCESS_KEY_ID }}
           aws-secret-access-key: ${{ secrets.CICD_AWS_SECRET_ACCESS_KEY }}
-          aws-region: us-east-1
+          aws-region: ${{ env.CICD_AWS_REGION }}
 
       - name: Decrypt files
         shell: pwsh
@@ -72,7 +73,7 @@ jobs:
         with:
           aws-access-key-id: ${{ inputs.approve_environment == 'PREPROD' && secrets.PREPROD_AWS_ACCESS_KEY_ID || secrets.PROD_AWS_ACCESS_KEY_ID }}
           aws-secret-access-key: ${{ inputs.approve_environment == 'PREPROD' && secrets.PREPROD_AWS_SECRET_ACCESS_KEY || secrets.PROD_AWS_SECRET_ACCESS_KEY}}
-          aws-region: ${{ inputs.aws_region }}
+          aws-region: ${{ inputs.aws-region }}
 
       - name: Terragrunt plan
         id: plan
