@@ -2,9 +2,84 @@ name: Infrastructure apply stack
 on:
   workflow_dispatch:
     inputs:
-      tag:
+      working-directory:
+        type: string
+        description: Path to terragrunt stack
+        required: true
+      aws_region:
+        type: string
+        description: Region for deployment
+        required: true
+      approve_environment:
+        type: string
+        description: Environment for select approvers
+        required: true
+      tg_environment:
+        type: string
+        required: true
+        description: Json environment variables for terragrunt
+      git_ref:
         type: string
 jobs:
+  plan:
+    runs-on: ubuntu-latest
+    outputs:
+      exitcode: ${{ steps.plan.outputs.exitcode }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+        with:
+          ref: "${{ inputs.tag == '' && '' || format('refs/tags/{0}', inputs.tag) }}"
+          submodules: true
+
+      - name: Setup terraform
+        uses: hashicorp/setup-terraform@v2
+
+      - name: Setup terragrunt
+        uses: autero1/action-terragrunt@v1.2.0
+        with:
+          terragrunt_version: 0.42.5
+      - uses: mdgreenwald/mozilla-sops-action@v1.4.0
+
+      - name: Configure CICD AWS Credentials
+        uses: aws-actions/configure-aws-credentials@v1
+        with:
+          aws-access-key-id: ${{ secrets.CICD_AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.CICD_AWS_SECRET_ACCESS_KEY }}
+          aws-region: us-east-1
+
+      - name: Decrypt files
+        shell: pwsh
+        env:
+          SOPS_KMS_ARN: ${{ secrets.SOPS_KMS_ARN }}
+        run: |
+          Get-ChildItem -Filter *.enc.json -Recurse | %{ sops -d $_.FullName > ( $_.FullName -replace ".enc.json$", ".json" ) }
+      - name: Configure AWS Credentials
+        uses: aws-actions/configure-aws-credentials@v1
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ${{ inputs.aws_region }}
+
+      - name: Terragrunt plan
+        id: plan
+        env: ${{ fromJson(inputs.tg_environment) }}
+        working-directory: ${{ inputs.working-directory }}
+        run: terragrunt plan  -detailed-exitcode -out=tfstate.plan -input=false
+
+      - name: Terragrunt show plan
+        env: ${{ fromJson(inputs.tg_environment) }}
+        if: ${{ steps.plan.outputs.exitcode == 2 }}
+        working-directory: ${{ inputs.working-directory }}
+        run: terragrunt show tfstate.plan && echo '```\n$( terragrunt show tfstate.plan )```'  > $GITHUB_STEP_SUMMARY
+
+      - uses: actions/upload-artifact@v2
+        env: ${{ fromJson(inputs.tg_environment) }}
+        if: ${{ steps.plan.outputs.exitcode == 2 }}
+        with:
+          name: terraform-plan
+          path: ${{ inputs.working-directory }}/tfstate.plan
+
   test-job:
     runs-on: ubuntu-latest
     steps:
