@@ -1,0 +1,29 @@
+plugins {
+    id 'java'
+    id 'pl.allegro.tech.build.axion-release' version '1.14.3'
+    id 'org.springframework.boot' version '3.0.1'
+}
+
+scmVersion {
+    repository {
+        directory = project.rootProject.file("../..")
+    }
+}
+
+group 'org.example'
+version scmVersion.version
+
+repositories {
+    mavenCentral()
+}
+
+dependencies {
+    implementation platform('org.springframework.boot:spring-boot-dependencies:3.0.1')
+    implementation 'org.springframework.boot:spring-boot-starter-web'
+
+    testImplementation 'org.springframework.boot:spring-boot-starter-test'
+}
+
+test {
+    useJUnitPlatform()
+}
