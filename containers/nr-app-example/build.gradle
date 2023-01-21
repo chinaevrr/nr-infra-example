@@ -2,6 +2,7 @@ plugins {
     id 'java'
     id 'pl.allegro.tech.build.axion-release' version '1.14.3'
     id 'org.springframework.boot' version '3.0.1'
+    id 'com.bmuschko.docker-java-application' version '9.1.0'
 }
 
 scmVersion {
@@ -26,4 +27,20 @@ dependencies {
 
 test {
     useJUnitPlatform()
+}
+
+docker {
+    dockerSyncBuildContext {
+        dependsOn = ["bootJar"]
+        from([bootJar.archiveFile, "Dockerfile"])
+        into dockerBuildImage.inputDir
+    }
+
+    dockerBuildImage {
+        dependsOn = ["dockerSyncBuildContext"]
+        images.set([
+                "${ System.env.DOCKER_REPOSITORY_PATH ?: project.name }:${project.version}",
+                "${ System.env.DOCKER_REPOSITORY_PATH ?: project.name }:latest",
+        ])
+    }
 }
