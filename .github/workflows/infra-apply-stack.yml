@@ -1,35 +1,44 @@
 name: Infrastructure apply stack
+run-name: 'Apply  stack: ${{ inputs.working-directory }} for ${{ inputs.aws-region }}-${{ inputs.environment }} from $GITHUB_REF by ${{ github.actor}}'
 on:
   workflow_dispatch:
     inputs:
       working-directory:
-        type: string
-        description: Path to terragrunt stack
         required: true
-      aws_region:
-        type: string
-        description: Region for deployment
+        type: choice
+        options:
+          - infrastructure/module-1
+
+      aws-region:
         required: true
-      approve_environment:
-        type: string
-        description: Environment for select approvers
+        type: choice
+        options: [ us-east-1, eu-west-1 ]
+
+      environment:
         required: true
-      tg_environment:
-        type: string
-        required: true
-        description: Json environment variables for terragrunt
-      git_ref:
-        type: string
+        type: choice
+        options: [ LAB, DEV, QA, PPE, PROD ]
+
 jobs:
   plan:
     runs-on: ubuntu-latest
     outputs:
       exitcode: ${{ steps.plan.outputs.exitcode }}
     steps:
+      - name: Prepare environment variables
+        shell: pwsh
+        run: |
+          $REGION_MAP = @{ 'us-east-1'='us'; 'eu-west-1'='ie' }
+          $APPROVE_ENV_MAP = @{ 'LAB' = 'PREPROD'; 'DEV' = 'PREPROD'; 'QA' = 'PREPROD'; 'PPE' = 'PROD'; 'PROD' = 'PROD' }
+          $TG_ENV = ConvertTo-Json @{
+            ENV = "asset-$( $REGION_MAP['${{ inputs.aws_region }}']  )-$( '${{ inputs.environment }}'.toLower() )"
+          } -Compress 
+          echo "approve_environment=$( $APPROVE_ENV_MAP['${{ inputs.environment }}'] )" | Out-File -Path $env:GITHUB_OUTPUT -Append -Encoding Utf8
+          echo "TG_ENV=$TG_ENV" | Out-File -Path $env:GITHUB_OUTPUT -Append -Encoding Utf8
+
       - name: Checkout
         uses: actions/checkout@v3
         with:
-          ref: "${{ inputs.tag == '' && '' || format('refs/tags/{0}', inputs.tag) }}"
           submodules: true
 
       - name: Setup terraform
@@ -50,10 +59,10 @@ jobs:
 
       - name: Decrypt files
         shell: pwsh
-        env:
-          SOPS_KMS_ARN: ${{ secrets.SOPS_KMS_ARN }}
+        working-directory: ./infrastructure
         run: |
           Get-ChildItem -Filter *.enc.json -Recurse | %{ sops -d $_.FullName > ( $_.FullName -replace ".enc.json$", ".json" ) }
+
       - name: Configure AWS Credentials
         uses: aws-actions/configure-aws-credentials@v1
         with:
