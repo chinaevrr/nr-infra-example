@@ -68,8 +68,6 @@ jobs:
         working-directory: ./infrastructure
         run: |
           Get-ChildItem -Filter *.enc.json -Recurse | %{ sops -d $_.FullName > ( $_.FullName -replace ".enc.json$", ".json" ) }
-          Write-Host "TG_ENV: $env:TG_ENV"
-
 
       - name: Configure AWS Credentials
         uses: aws-actions/configure-aws-credentials@v1
