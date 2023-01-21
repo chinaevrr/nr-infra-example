@@ -18,7 +18,8 @@ on:
         required: true
         type: choice
         options: [ LAB, DEV, QA, PPE, PROD ]
-
+env:
+  ASSET_ID: assetId
 jobs:
   plan:
     runs-on: ubuntu-latest
@@ -30,10 +31,13 @@ jobs:
         run: |
           $REGION_MAP = @{ 'us-east-1'='us'; 'eu-west-1'='ie' }
           $APPROVE_ENV_MAP = @{ 'LAB' = 'PREPROD'; 'DEV' = 'PREPROD'; 'QA' = 'PREPROD'; 'PPE' = 'PROD'; 'PROD' = 'PROD' }
+          
           $TG_ENV = ConvertTo-Json @{
-            ENV = "asset-$( $REGION_MAP['${{ inputs.aws_region }}']  )-$( '${{ inputs.environment }}'.toLower() )"
-          } -Compress 
-          echo "approve_environment=$( $APPROVE_ENV_MAP['${{ inputs.environment }}'] )" | Out-File -Path $env:GITHUB_OUTPUT -Append -Encoding Utf8
+            # example: assetId-us-lab
+            ENV = "$env:ASSET_ID-$( $REGION_MAP['${{ inputs.aws_region }}']  )-$( '${{ inputs.environment }}'.toLower() )"
+          } -Compress
+          
+          echo "GITHUB_PROTECTED_ENV=$( $APPROVE_ENV_MAP['${{ inputs.environment }}'] )" | Out-File -Path $env:GITHUB_OUTPUT -Append -Encoding Utf8
           echo "TG_ENV=$TG_ENV" | Out-File -Path $env:GITHUB_OUTPUT -Append -Encoding Utf8
 
       - name: Checkout
@@ -74,20 +78,20 @@ jobs:
         id: plan
         env: ${{ fromJson(inputs.tg_environment) }}
         working-directory: ${{ inputs.working-directory }}
-        run: terragrunt plan  -detailed-exitcode -out=tfstate.plan -input=false
+        run: terragrunt plan  -detailed-exitcode -out=plan.out -input=false
 
       - name: Terragrunt show plan
         env: ${{ fromJson(inputs.tg_environment) }}
         if: ${{ steps.plan.outputs.exitcode == 2 }}
         working-directory: ${{ inputs.working-directory }}
-        run: terragrunt show tfstate.plan && echo '```\n$( terragrunt show tfstate.plan )```'  > $GITHUB_STEP_SUMMARY
+        run: terragrunt show plan.out && echo '```\n$( terragrunt show plan.out )```'  > $GITHUB_STEP_SUMMARY
 
       - uses: actions/upload-artifact@v2
         env: ${{ fromJson(inputs.tg_environment) }}
         if: ${{ steps.plan.outputs.exitcode == 2 }}
         with:
           name: terraform-plan
-          path: ${{ inputs.working-directory }}/tfstate.plan
+          path: ${{ inputs.working-directory }}/plan.out
 
   test-job:
     runs-on: ubuntu-latest
