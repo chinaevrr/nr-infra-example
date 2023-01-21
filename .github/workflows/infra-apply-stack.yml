@@ -28,6 +28,7 @@ jobs:
       exitcode: ${{ steps.plan.outputs.exitcode }}
     steps:
       - name: Prepare environment variables
+        id: prep-env
         shell: pwsh
         run: |
           $REGION_MAP = @{ 'us-east-1'='us'; 'eu-west-1'='ie' }
@@ -79,12 +80,12 @@ jobs:
 
       - name: Terragrunt plan
         id: plan
-        env: ${{ fromJson(env.TG_ENV) }}
+        env: ${{ fromJson(steps.prep-env.outputs.TG_ENV) }}
         working-directory: ${{ inputs.working-directory }}
         run: terragrunt plan  -detailed-exitcode -out=plan.out -input=false
 
       - name: Terragrunt show plan
-        env: ${{ fromJson(env.TG_ENV) }}
+        env: ${{ fromJson(steps.prep-env.outputs.TG_ENV) }}
         if: ${{ steps.plan.outputs.exitcode == 2 }}
         working-directory: ${{ inputs.working-directory }}
         run: terragrunt show plan.out && echo '```\n$( terragrunt show plan.out )```'  > $GITHUB_STEP_SUMMARY
