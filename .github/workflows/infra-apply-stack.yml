@@ -3,11 +3,14 @@ on:
   workflow_dispatch:
     inputs:
       version:
-        type: branch-selection
+        type: string
+        required: true
 jobs:
   test-job:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
         uses: actions/checkout@v3
+        with:
+          ref: {{ inputs.version }}
       - run: ls containers/nr-app-example
