@@ -1,0 +1,8 @@
+name: Infrastructure apply stack
+on:
+  workflow_dispatch:
+jobs:
+  test-job:
+    runs-on: ubuntu-latest
+    steps:
+      - run: echo $PATH
