@@ -7,4 +7,4 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v3
-      - run: ls
+      - run: ls containers/nr-app-example
