@@ -89,7 +89,6 @@ jobs:
         run: terragrunt show plan.out && echo '```\n$( terragrunt show plan.out )```'  > $GITHUB_STEP_SUMMARY
 
       - uses: actions/upload-artifact@v2
-        env: ${{ fromJson(env.TG_ENV) }}
         if: ${{ steps.plan.outputs.exitcode == 2 }}
         with:
           name: terraform-plan
