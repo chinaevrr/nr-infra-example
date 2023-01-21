@@ -12,5 +12,5 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v3
         with:
-          ref: {{ inputs.version }}
+          ref: "{{ inputs.version }}"
       - run: ls containers/nr-app-example
