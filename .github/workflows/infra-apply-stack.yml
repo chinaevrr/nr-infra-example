@@ -2,7 +2,7 @@ name: Infrastructure apply stack
 on:
   workflow_dispatch:
     inputs:
-      version:
+      tag:
         type: string
         required: true
 jobs:
@@ -12,5 +12,6 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v3
         with:
-          ref: "${{ inputs.version }}"
+          ref: "${{ inputs.tag == '' && '' || format('refs/tags/{0}', inputs.tag) }}' }}"
+          submodules: true
       - run: ls containers/nr-app-example
