@@ -77,18 +77,18 @@ jobs:
 
       - name: Terragrunt plan
         id: plan
-        env: ${{ fromJson(inputs.tg_environment) }}
+        env: ${{ fromJson(env.TG_ENV) }}
         working-directory: ${{ inputs.working-directory }}
         run: terragrunt plan  -detailed-exitcode -out=plan.out -input=false
 
       - name: Terragrunt show plan
-        env: ${{ fromJson(inputs.tg_environment) }}
+        env: ${{ fromJson(env.TG_ENV) }}
         if: ${{ steps.plan.outputs.exitcode == 2 }}
         working-directory: ${{ inputs.working-directory }}
         run: terragrunt show plan.out && echo '```\n$( terragrunt show plan.out )```'  > $GITHUB_STEP_SUMMARY
 
       - uses: actions/upload-artifact@v2
-        env: ${{ fromJson(inputs.tg_environment) }}
+        env: ${{ fromJson(env.TG_ENV) }}
         if: ${{ steps.plan.outputs.exitcode == 2 }}
         with:
           name: terraform-plan
