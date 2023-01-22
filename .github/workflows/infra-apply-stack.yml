@@ -26,6 +26,8 @@ jobs:
     runs-on: ubuntu-latest
     outputs:
       exitcode: ${{ steps.plan.outputs.exitcode }}
+      github-protected-env: ${{ steps.prep-env.GITHUB_PROTECTED_ENV }}
+      tg-env: ${{ steps.prep-env.TG_ENV }}
     steps:
       - name: Prepare environment variables
         id: prep-env
@@ -112,3 +114,67 @@ jobs:
         with:
           name: terraform-plan
           path: ${{ inputs.working-directory }}/plan.out
+  apply:
+    runs-on: ubuntu-latest
+    needs: plan
+    if: ${{ needs.plan.outputs.exitcode == 2 }}
+    environment: ${{ needs.plan.outputs.github-protected-env }}
+    steps:
+      - name: Prepare environment variables
+        id: prep-env
+        shell: pwsh
+        run: |
+          $REGION_MAP = @{ 'us-east-1'='us'; 'eu-west-1'='ie' }
+          $APPROVE_ENV_MAP = @{ 'LAB' = 'PREPROD'; 'DEV' = 'PREPROD'; 'QA' = 'PREPROD'; 'PPE' = 'PROD'; 'PROD' = 'PROD' }
+          
+          $TG_ENV = ConvertTo-Json @{
+            # example: assetId-us-lab
+            ENV = "$env:ASSET_ID-$( $REGION_MAP['${{ inputs.aws_region }}']  )-$( '${{ inputs.environment }}'.toLower() )"
+          } -Compress
+          
+          echo "GITHUB_PROTECTED_ENV=$( $APPROVE_ENV_MAP['${{ inputs.environment }}'] )" | Out-File -Path $env:GITHUB_OUTPUT -Append -Encoding Utf8
+          echo "TG_ENV=$TG_ENV" | Out-File -Path $env:GITHUB_OUTPUT -Append -Encoding Utf8
+
+      - name: Checkout
+        uses: actions/checkout@v3
+        with:
+          submodules: true
+
+      - name: Setup terraform
+        uses: hashicorp/setup-terraform@v2
+
+      - name: Setup terragrunt
+        uses: autero1/action-terragrunt@v1.2.0
+        with:
+          terragrunt_version: 0.42.5
+      - uses: mdgreenwald/mozilla-sops-action@v1.4.0
+
+      - name: Configure CICD AWS Credentials
+        uses: aws-actions/configure-aws-credentials@v1
+        with:
+          aws-access-key-id: ${{ secrets.CICD_AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.CICD_AWS_SECRET_ACCESS_KEY }}
+          aws-region: ${{ env.CICD_AWS_REGION }}
+
+      - name: Decrypt files
+        shell: pwsh
+        working-directory: ./infrastructure
+        run: |
+          Get-ChildItem -Filter *.enc.json -Recurse | %{ sops -d $_.FullName > ( $_.FullName -replace ".enc.json$", ".json" ) }
+
+      - name: Configure AWS Credentials
+        uses: aws-actions/configure-aws-credentials@v1
+        with:
+          aws-access-key-id: ${{ inputs.approve_environment == 'PREPROD' && secrets.PREPROD_AWS_ACCESS_KEY_ID || secrets.PROD_AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ inputs.approve_environment == 'PREPROD' && secrets.PREPROD_AWS_SECRET_ACCESS_KEY || secrets.PROD_AWS_SECRET_ACCESS_KEY}}
+          aws-region: ${{ inputs.aws-region }}
+
+      - uses: actions/download-artifact@v2
+        with:
+          name: terraform-plan
+          path: ${{ inputs.working-directory }}
+
+      - name: Terragrunt apply
+        env: ${{ fromJson(steps.prep-env.outputs.TG_ENV) }}
+        working-directory: ${{ inputs.working-directory }}
+        run: terragrunt apply plan.out
