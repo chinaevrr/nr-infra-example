@@ -26,8 +26,8 @@ jobs:
     runs-on: ubuntu-latest
     outputs:
       exitcode: ${{ steps.plan.outputs.exitcode }}
-      github-protected-env: ${{ steps.prep-env.GITHUB_PROTECTED_ENV }}
-      tg-env: ${{ steps.prep-env.TG_ENV }}
+      github-protected-env: ${{ steps.prep-env.outputs.GITHUB_PROTECTED_ENV }}
+      tg-env: ${{ steps.prep-env.outputs.TG_ENV }}
     steps:
       - name: Prepare environment variables
         id: prep-env
