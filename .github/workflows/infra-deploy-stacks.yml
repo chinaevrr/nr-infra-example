@@ -19,6 +19,7 @@ jobs:
       working-directory: ./infrastructure/module-1
       aws-region: ${{ inputs.aws-region }}
       environment: ${{ inputs.environment }}
+    secrets: inherit
   module-2:
     needs: module-1
     uses: ./.github/workflows/infra-apply-stack.yml
@@ -26,6 +27,7 @@ jobs:
       working-directory: ./infrastructure/module-2
       aws-region: ${{ inputs.aws-region }}
       environment: ${{ inputs.environment }}
+    secrets: inherit
   module-3:
     needs: module-2
     uses: ./.github/workflows/infra-apply-stack.yml
@@ -33,6 +35,7 @@ jobs:
       working-directory: ./infrastructure/module-3
       aws-region: ${{ inputs.aws-region }}
       environment: ${{ inputs.environment }}
+    secrets: inherit
   module-4:
     needs: module-3
     uses: ./.github/workflows/infra-apply-stack.yml
@@ -40,6 +43,7 @@ jobs:
       working-directory: ./infrastructure/module-4
       aws-region: ${{ inputs.aws-region }}
       environment: ${{ inputs.environment }}
+    secrets: inherit
   module-5:
     needs: module-4
     uses: ./.github/workflows/infra-apply-stack.yml
@@ -47,6 +51,7 @@ jobs:
       working-directory: ./infrastructure/module-5
       aws-region: ${{ inputs.aws-region }}
       environment: ${{ inputs.environment }}
+    secrets: inherit
   module-6:
     needs: module-5
     uses: ./.github/workflows/infra-apply-stack.yml
@@ -54,6 +59,7 @@ jobs:
       working-directory: ./infrastructure/module-6
       aws-region: ${{ inputs.aws-region }}
       environment: ${{ inputs.environment }}
+    secrets: inherit
   module-7:
     needs: module-6
     uses: ./.github/workflows/infra-apply-stack.yml
@@ -61,3 +67,4 @@ jobs:
       working-directory: ./infrastructure/module-7
       aws-region: ${{ inputs.aws-region }}
       environment: ${{ inputs.environment }}
+    secrets: inherit
