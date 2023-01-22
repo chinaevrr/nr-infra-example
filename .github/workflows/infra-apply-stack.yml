@@ -123,7 +123,7 @@ jobs:
       - uses: actions/upload-artifact@v2
         if: success() && ${{ steps.plan.outputs.exitcode == 2 }}
         with:
-          name: terraform-plan
+          name: ${{ inputs.working-directory }}/plan.out
           path: ${{ inputs.working-directory }}/plan.out
   apply:
     runs-on: ubuntu-latest
@@ -182,7 +182,7 @@ jobs:
 
       - uses: actions/download-artifact@v2
         with:
-          name: terraform-plan
+          name: ${{ inputs.working-directory }}/plan.out
           path: ${{ inputs.working-directory }}
 
       - name: Terragrunt apply
