@@ -89,7 +89,12 @@ jobs:
         shell: pwsh
         run: |
           terragrunt show plan.out
-          echo "``````diff`n$(terraform show -no-color plan.out)`n``````" | Out-File -Path $env:GITHUB_STEP_SUMMARY -Append -Encoding Utf8
+          $plan = terragrunt show -no-color plan.out
+          @"
+          ``````diff
+          $((terraform show -no-color plan.out) -join "`n")   
+          ``````
+          "@ | Out-File -Path $env:GITHUB_STEP_SUMMARY -Append -Encoding Utf8
 
       - uses: actions/upload-artifact@v2
         if: success() && ${{ steps.plan.outputs.exitcode == 2 }}
