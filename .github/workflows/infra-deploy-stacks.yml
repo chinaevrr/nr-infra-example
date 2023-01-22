@@ -1,0 +1,63 @@
+name: Infrastructure apply stack
+run-name: 'Apply  stack: ${{ inputs.working-directory }} for ${{ inputs.environment }}@${{ inputs.aws-region }} from ${{ github.ref }} by ${{ github.actor}}'
+on:
+  workflow_dispatch:
+    inputs:
+      aws-region:
+        required: true
+        type: choice
+        options: [ us-east-1, eu-west-1 ]
+
+      environment:
+        required: true
+        type: choice
+        options: [ LAB, DEV, QA, PPE, PROD ]
+jobs:
+  module-1:
+    uses: ./.github/workflows/infra-apply-stack.yml
+    with:
+      working-directory: ./infrastructure/module-1
+      aws-region: ${{ inputs.aws-region }}
+      environment: ${{ inputs.environment }}
+  module-2:
+    needs: module-1
+    uses: ./.github/workflows/infra-apply-stack.yml
+    with:
+      working-directory: ./infrastructure/module-2
+      aws-region: ${{ inputs.aws-region }}
+      environment: ${{ inputs.environment }}
+  module-3:
+    needs: module-2
+    uses: ./.github/workflows/infra-apply-stack.yml
+    with:
+      working-directory: ./infrastructure/module-3
+      aws-region: ${{ inputs.aws-region }}
+      environment: ${{ inputs.environment }}
+  module-4:
+    needs: module-3
+    uses: ./.github/workflows/infra-apply-stack.yml
+    with:
+      working-directory: ./infrastructure/module-4
+      aws-region: ${{ inputs.aws-region }}
+      environment: ${{ inputs.environment }}
+  module-5:
+    needs: module-4
+    uses: ./.github/workflows/infra-apply-stack.yml
+    with:
+      working-directory: ./infrastructure/module-5
+      aws-region: ${{ inputs.aws-region }}
+      environment: ${{ inputs.environment }}
+  module-6:
+    needs: module-5
+    uses: ./.github/workflows/infra-apply-stack.yml
+    with:
+      working-directory: ./infrastructure/module-6
+      aws-region: ${{ inputs.aws-region }}
+      environment: ${{ inputs.environment }}
+  module-7:
+    needs: module-6
+    uses: ./.github/workflows/infra-apply-stack.yml
+    with:
+      working-directory: ./infrastructure/module-7
+      aws-region: ${{ inputs.aws-region }}
+      environment: ${{ inputs.environment }}

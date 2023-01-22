@@ -1,6 +1,17 @@
 name: Infrastructure apply stack
 run-name: 'Apply  stack: ${{ inputs.working-directory }} for ${{ inputs.environment }}@${{ inputs.aws-region }} from ${{ github.ref }} by ${{ github.actor}}'
 on:
+  workflow_call:
+    inputs:
+      working-directory:
+        type: string
+
+      aws-region:
+        type: string
+
+      environment:
+        type: string
+
   workflow_dispatch:
     inputs:
       working-directory:
