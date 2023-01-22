@@ -1,5 +1,5 @@
-name: Infrastructure apply stack
-run-name: 'Apply  stack: ${{ inputs.working-directory }} for ${{ inputs.environment }}@${{ inputs.aws-region }} from ${{ github.ref }} by ${{ github.actor}}'
+name: Deploy infrastructure
+run-name: 'Deploy infrastructure for ${{ inputs.environment }}@${{ inputs.aws-region }} from ${{ github.ref }} by ${{ github.actor}}'
 on:
   workflow_dispatch:
     inputs:
