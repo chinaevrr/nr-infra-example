@@ -94,10 +94,10 @@ jobs:
           <details>
           <summary>${{ inputs.working-directory }} for ${{ inputs.environment }}@${{ inputs.aws-region }} from ${{ github.ref }}</summary>
           
-          + *Module path*: ${{ inputs.working-directory }}
-          + *Environment*: ${{ inputs.environment }}
-          + *Region*: ${{ inputs.aws-region }}
-          + *Git reference*: ${{ github.ref }}
+          + __Module path__: *${{ inputs.working-directory }}*
+          + __Environment__: *${{ inputs.environment }}*
+          + __Region__: *${{ inputs.aws-region }}*
+          + __Git reference__: *${{ github.ref }}*
           
           ``````diff
           $((terraform show -no-color plan.out | ?{$_ -notlike '[command]/home/runner/*' -and $_ -notlike '::debug::*'}) -join "`n")   
