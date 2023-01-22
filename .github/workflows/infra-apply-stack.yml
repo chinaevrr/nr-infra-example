@@ -92,7 +92,7 @@ jobs:
           $plan = terragrunt show -no-color plan.out
           @"
           ``````diff
-          $((terraform show -no-color plan.out) -join "`n")   
+          $((terraform show -no-color plan.out | ?{$_ -notlike '[command]/home/runner/*' -and $_ -notlike '::debug::*'}) -join "`n")   
           ``````
           "@ | Out-File -Path $env:GITHUB_STEP_SUMMARY -Append -Encoding Utf8
 
