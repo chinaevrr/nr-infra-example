@@ -54,7 +54,7 @@ jobs:
           
           echo "GITHUB_PROTECTED_ENV=$( $APPROVE_ENV_MAP['${{ inputs.environment }}'] )" | Out-File -Path $env:GITHUB_OUTPUT -Append -Encoding Utf8
           echo "TG_ENV=$TG_ENV" | Out-File -Path $env:GITHUB_OUTPUT -Append -Encoding Utf8
-          echo "PLAN_PATH=$( "${{ inputs.working-directory }}/plan.out" -replace "/:", "-" )" | Out-File -Path $env:GITHUB_OUTPUT -Append -Encoding Utf8
+          echo "PLAN_PATH=$( "${{ inputs.working-directory }}/plan.out" -replace "/", "-" )" | Out-File -Path $env:GITHUB_OUTPUT -Append -Encoding Utf8
 
       - name: Checkout
         uses: actions/checkout@v3
