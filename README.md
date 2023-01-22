@@ -1,5 +1,5 @@
 # NR-INFRA-EXAMPLE
-```hcl
+```diff
 Terraform used the selected providers to generate the following execution plan. Resource actions are indicated with the following symbols:
 + create
 - destroy
