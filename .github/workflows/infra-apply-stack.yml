@@ -50,7 +50,7 @@ jobs:
           $TG_ENV = ConvertTo-Json @{
             # example: assetId-us-lab
             ENV = "$env:ASSET_ID-$( $REGION_MAP['${{ inputs.aws_region }}']  )-$( '${{ inputs.environment }}'.toLower() )"
-            PLAN_PATH = "${{ inputs.working-directory }}" -replace "/:", "-" 
+            PLAN_PATH = "${{ inputs.working-directory }}/plan.out" -replace "/:", "-" 
           } -Compress
           
           echo "GITHUB_PROTECTED_ENV=$( $APPROVE_ENV_MAP['${{ inputs.environment }}'] )" | Out-File -Path $env:GITHUB_OUTPUT -Append -Encoding Utf8
@@ -124,7 +124,7 @@ jobs:
       - uses: actions/upload-artifact@v2
         if: success() && ${{ steps.plan.outputs.exitcode == 2 }}
         with:
-          name: ${{ inputs.working-directory }}/plan.out
+          name: ${{ steps.prep-env.outputs.PLAN_PATH }}
           path: ${{ inputs.working-directory }}/plan.out
   apply:
     runs-on: ubuntu-latest
@@ -183,7 +183,7 @@ jobs:
 
       - uses: actions/download-artifact@v2
         with:
-          name: ${{ inputs.working-directory }}/plan.out
+          name: ${{ steps.prep-env.outputs.PLAN_PATH }}
           path: ${{ inputs.working-directory }}
 
       - name: Terragrunt apply
