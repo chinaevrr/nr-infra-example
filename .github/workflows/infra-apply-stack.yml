@@ -50,6 +50,7 @@ jobs:
           $TG_ENV = ConvertTo-Json @{
             # example: assetId-us-lab
             ENV = "$env:ASSET_ID-$( $REGION_MAP['${{ inputs.aws_region }}']  )-$( '${{ inputs.environment }}'.toLower() )"
+            PLAN_PATH = "${{ inputs.working-directory }}" -replace "/:", "-" 
           } -Compress
           
           echo "GITHUB_PROTECTED_ENV=$( $APPROVE_ENV_MAP['${{ inputs.environment }}'] )" | Out-File -Path $env:GITHUB_OUTPUT -Append -Encoding Utf8
