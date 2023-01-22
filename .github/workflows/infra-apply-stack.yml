@@ -105,9 +105,6 @@ jobs:
           terragrunt show plan.out
           $plan = terragrunt show -no-color plan.out
           @"
-          <details>
-          <summary>${{ inputs.working-directory }} for ${{ inputs.environment }}@${{ inputs.aws-region }} from ${{ github.ref }}</summary>
-          
           + __Module path__: *${{ inputs.working-directory }}*
           + __Environment__: *${{ inputs.environment }}*
           + __Region__: *${{ inputs.aws-region }}*
@@ -116,9 +113,6 @@ jobs:
           ``````diff
           $((terraform show -no-color plan.out | ?{$_ -notlike '[command]/home/runner/*' -and $_ -notlike '::debug::*'}) -join "`n")   
           ``````
-  
-          </details>
-          
           "@ | Out-File -Path $env:GITHUB_STEP_SUMMARY -Append -Encoding Utf8
 
       - uses: actions/upload-artifact@v2
