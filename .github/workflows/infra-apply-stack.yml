@@ -49,12 +49,12 @@ jobs:
           
           $TG_ENV = ConvertTo-Json @{
             # example: assetId-us-lab
-            ENV = "$env:ASSET_ID-$( $REGION_MAP['${{ inputs.aws_region }}']  )-$( '${{ inputs.environment }}'.toLower() )"
-            PLAN_PATH = "${{ inputs.working-directory }}/plan.out" -replace "/:", "-" 
+            ENV = "$env:ASSET_ID-$( $REGION_MAP['${{ inputs.aws_region }}']  )-$( '${{ inputs.environment }}'.toLower() )" 
           } -Compress
           
           echo "GITHUB_PROTECTED_ENV=$( $APPROVE_ENV_MAP['${{ inputs.environment }}'] )" | Out-File -Path $env:GITHUB_OUTPUT -Append -Encoding Utf8
           echo "TG_ENV=$TG_ENV" | Out-File -Path $env:GITHUB_OUTPUT -Append -Encoding Utf8
+          echo "PLAN_PATH=$( "${{ inputs.working-directory }}/plan.out" -replace "/:", "-" )" | Out-File -Path $env:GITHUB_OUTPUT -Append -Encoding Utf8
 
       - name: Checkout
         uses: actions/checkout@v3
@@ -182,6 +182,7 @@ jobs:
           aws-region: ${{ inputs.aws-region }}
 
       - uses: actions/download-artifact@v2
+        env: ${{ fromJson(steps.prep-env.outputs.TG_ENV) }}
         with:
           name: ${{ steps.prep-env.outputs.PLAN_PATH }}
           path: ${{ inputs.working-directory }}
