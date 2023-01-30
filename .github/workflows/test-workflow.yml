@@ -11,4 +11,4 @@ jobs:
   job:
     runs-on: ubuntu-latest
     steps:
-      - run: echo '${{ fromJson(env.AWS_REGIONS["us-east-1"]) }}'
+      - run: echo '${{ fromJson(env.AWS_REGIONS)["us-east-1"] }}'
