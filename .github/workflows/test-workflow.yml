@@ -1,0 +1,8 @@
+name: Test WF
+on: workflow_dispatch
+env:
+jobs:
+  job:
+    runs-on: ubuntu-latest
+    steps:
+      - run: echo ${{ toJson(env) }}
