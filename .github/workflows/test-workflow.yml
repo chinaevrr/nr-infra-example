@@ -1,6 +1,7 @@
 name: Test WF
 on: workflow_dispatch
 env:
+  DUMMY_VALUE: "QWERTYY"
 jobs:
   job:
     runs-on: ubuntu-latest
