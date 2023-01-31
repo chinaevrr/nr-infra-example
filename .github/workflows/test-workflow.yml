@@ -14,5 +14,5 @@ jobs:
       - shell: pwsh
         id: json-env
         run: |
-          echo "JSON_ENV=DUMMY_VALUE" | Out-File -Path $Env:GITHUB_OUTPUT -Append -Encoding Utf8
+          echo "JSON_ENV=DUMMY_VALUE" >> $Env:GITHUB_OUTPUT
       - run: echo '${{ steps.json-env.outputs.JSON_ENV }}'
