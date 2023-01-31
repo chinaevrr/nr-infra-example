@@ -11,4 +11,8 @@ jobs:
   job:
     runs-on: ubuntu-latest
     steps:
-      - run: echo '${{ fromJson(env.AWS_REGIONS)[env.DUMMY_VALUE] }}'
+      - shell: pwsh
+        id: json-env
+        run: |
+          echo "JSON_ENV=DUMMY_VALUE" | Out-File -Path $Env:GITHUB_OUTPUT -Append -Encoding Utf8
+      - run: echo '${{ steps.json-env.outputs.JSON_ENV }}'
